@@ -25,7 +25,7 @@ type Post = {
     | undefined;
 };
 
-export default async function Page() {
+export default async function Home() {
   const data = await fetch("https://api.vercel.app/blog");
   const posts = await data.json();
   return (
