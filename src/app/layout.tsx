@@ -24,10 +24,56 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+        <head>
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `
+                  console.log('📄 Layout head script executing...');
+                  
+                  // Load the manual Module Federation init
+                  import('/bootstrap.js')
+                    .then(module => {
+                      console.log('✅ Module Federation init loaded');
+                      return module.createModuleFederationContainer();
+                    })
+                    .catch(error => {
+                      console.error('❌ Failed to load Module Federation init:', error);
+                    });
+                `,
+              }}
+            />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              console.log('📄 Layout body script executing...');
+              
+              // Fallback: try to create container after a delay
+              setTimeout(() => {
+                if (!window.remoteApp) {
+                  console.log('🔄 Creating fallback Module Federation container...');
+                  
+                  window.remoteApp = {
+                    init: (shareScope) => {
+                      console.log('🚀 Fallback container initialized');
+                      return Promise.resolve();
+                    },
+                    get: (module) => {
+                      console.log('📦 Fallback getting module:', module);
+                      return Promise.reject(new Error('Fallback: Module not implemented yet'));
+                    }
+                  };
+                  
+                  console.log('✅ Fallback container created:', window.remoteApp);
+                }
+              }, 2000);
+            `,
+          }}
+        />
       </body>
     </html>
   );
